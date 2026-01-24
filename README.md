@@ -12,15 +12,18 @@ Before running this code, please install the following prerequisites.
 
 `pip install gpiozero` or `sudo apt install python3-gpiozero`
 
+`pip install numpy`
+
 The SMA inverter needs to have its MODBUS TCP server enabled (Parameter.Mb.TcpSrv.IsOn). I highly recommend changing the default port from `502` to something different (Parameter.Mb.TcpSrv.Port). 
 
 ## Configuration
 
-Change the following in the code to match your configuration.
-1. IP Address (line 9)
-2. Port (line 10, the number that you changed from default earlier!)
-3. GPIO Pin (line 20, for example, `PWMLED(23)` corresponds to pin 16 on a Pi Zero W)
-4. Divisor for setting `led.value` (for example, my inverter has a full load capacity of 5760 watts. By dividing instantaneous power from this number, a dimensionless ratio between 0 and 1 is established to adjust the PWM output duty cycle).
+All configuration parameters are centralized at the top of `sundial.py`. Edit the following constants to match your setup:
+
+1. `INVERTER_HOST` - IP address of the SMA inverter
+2. `MODBUS_PORT` - MODBUS TCP port (the number that you changed from default earlier!)
+3. `GPIO_PIN` - GPIO pin for PWM output (for example, `23` corresponds to pin 16 on a Pi Zero W)
+4. `MAX_POWER` - Maximum inverter output in watts (for example, my inverter has a full load capacity of 5760 watts. By dividing instantaneous power by this number, a dimensionless ratio between 0 and 1 is established to adjust the PWM output duty cycle).
 
 The code can be modified to pull other quantities from the inverter. A list of quantities with their MODBUS addresses (e.g. 30775) and data types (e.g. INT32) can be found here: https://files.sma.de/downloads/EDMx-Modbus-TI-en-16.pdf
 
@@ -40,8 +43,23 @@ To account for slight errors in the pi's output voltage and the ammeter's calibr
 
 Lastly, the capacitor can be installed to smooth out the choppy pulse-width modulation signal into a constant voltage. You can choose anything from 5μF up to 100μF, electrolytic or ceramic. I honestly didn't see a lot of difference in the "jumpiness" of my ammeter after including the capacitor, as the inductance of the meter did a good enough job of smoothing the PWM by itself. Please feel free to suggest a better circuit to smooth the output. 
 
+## Calibration
+
+Analog ammeters often have non-linear response, meaning 50% PWM output may not display exactly 50% on the dial. The calibration feature corrects for this by measuring the actual dial readings at known PWM levels and interpolating between them.
+
+To calibrate your ammeter:
+
+1. Run `python sundial.py --calibrate`
+2. The script will output PWM at each calibration level (0%, 25%, 50%, 75%, 100% by default)
+3. For each level, read the dial and enter the actual reading
+4. Calibration data is saved to `calibration.json`
+
+You can customize the calibration points by editing `CALIBRATION_PERCENTAGES` in the configuration section.
+
 ## Running
 
-From the folder containing the script, simply type `python sundial.py` to run the code. If your pi successfully connects to your inverter, you'll see the instantaneous power update in your terminal every second. 
+From the folder containing the script, simply type `python sundial.py` to run the code. If your pi successfully connects to your inverter, you'll see the instantaneous power update in your terminal every second. The calibration from `calibration.json` is automatically applied if present.
+
+Run `python sundial.py --help` to see all available options.
 
 Run `nohup python sundial.py &` if you want the code to stay alive after you disconnect your terminal session. 
