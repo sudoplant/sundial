@@ -4,15 +4,23 @@ This is a python application that polls SMA Sunny Boy inverters via MODBUS TCP a
 
 ## Prerequisites
 
-Before running this code, please install the following prerequisites. 
+Before running this code, install Python and pip:
 
-`sudo apt install python3 python3-pip`
+```bash
+sudo apt install python3 python3-pip
+```
 
-`pip install pymodbus`
+Then install the project dependencies:
 
-`pip install gpiozero` or `sudo apt install python3-gpiozero`
+```bash
+pip install .
+```
 
-`pip install numpy`
+Or for development (editable install):
+
+```bash
+pip install -e .
+```
 
 The SMA inverter needs to have its MODBUS TCP server enabled (Parameter.Mb.TcpSrv.IsOn). I highly recommend changing the default port from `502` to something different (Parameter.Mb.TcpSrv.Port). 
 
