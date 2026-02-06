@@ -1,0 +1,18 @@
+[project]
+name = "sundial"
+version = "0.1.0"
+description = "Solar inverter power monitor with analog ammeter display for Raspberry Pi"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "pymodbus>=3.0.0",
+    "gpiozero",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+sundial = "sundial:main"
